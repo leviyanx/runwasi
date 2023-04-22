@@ -22,6 +22,13 @@ RUN \
 FROM scratch AS shim
 COPY --from=shim-build /opt/shim/bin/* /
 
+# containerd
+FROM scratch AS containerd
+COPY containerd /
+COPY containerd-shim /
+COPY containerd-shim-runc-v1 /
+COPY containerd-shim-runc-v2 /
+COPY containerd-stress /
 
 # Reuse kind-base so we don't have to download other images...
 FROM kind-base AS kind-fetch
@@ -40,4 +47,4 @@ echo 'runtime_type = "io.containerd.wasmtime.v1"' >> /etc/containerd/config.toml
 sed -i 's,SystemdCgroup = true,,' /etc/containerd/config.toml
 EOF
 COPY --link --from=shim /* /usr/local/bin/
-
+COPY --link --from=containerd /* /usr/local/bin/
